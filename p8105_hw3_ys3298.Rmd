@@ -1,0 +1,116 @@
+---
+title: "p8105_hw3_ys3298"
+author: "Yimeng SHANG"
+date: "10/3/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(p8105.datasets)
+library(tidyverse)
+data("instacart")
+```
+
+```{r include=FALSE}
+aisle_num =
+  instacart %>%
+  group_by(aisle) %>%
+  summarise(number = n()) %>%
+  count() %>%
+  as.integer()
+  
+aisle_max = 
+  instacart %>%
+  group_by(aisle) %>%
+  summarise(number = n()) %>%
+  filter(number == max(number)) %>%
+  select(-number) %>%
+  as.character()
+```
+
+# Short description
+**The size and structure of the data:** There are `r nrow(instacart)` observations and `r ncol(instacart)` variables in the data. It's a `r dim(instacart)` dataframe. Most of the variable types are integers and some are characters. \newline
+**Some key variables:** Product name; aisle; department; order number and so on. \newline
+**illstrative examples of observations:** For the 1st order, there're 8 different kind of products. Eval set is train. In details, the first product is `r instacart[1,11]`, aisle id is `r instacart[1,12]`, department id is `r instacart[1,13]`, aisle is `r instacart[1,14]`, department is `r instacart[1,15]`. For the second observations, aisle id is `r instacart[2,12]`, department id is `r instacart[2,13]`, aisle is `r instacart[2,14]`, department is `r instacart[2,15]` \newline
+**How many aisles are there, and which aisles are the most items ordered from?** There are `r aisle_num` aisles. The most items ordered from `r aisle_max` \newline
+
+# Make a plot
+```{r echo=FALSE}
+
+  instacart %>%
+  group_by(aisle) %>%
+  summarise(number = n()) %>%
+  filter(number >= 10000) %>%
+  ggplot(aes(x = reorder(aisle, number), y = number, fill = aisle)) +
+  geom_col() + coord_flip() +
+  viridis::scale_fill_viridis(option = "viridis" , discrete = TRUE) +
+  labs(
+    title = "Aisle Plot",
+    x = "aisles",
+    y = "number"
+  )
+```
+
+# Make a table
+```{r echo=FALSE}
+baking = 
+  instacart %>%
+  group_by(product_name) %>%
+  filter(aisle == "baking ingredients") %>%
+  summarise(order_times = n()) %>%
+  arrange(desc(order_times)) %>%
+  head(n = 3) %>%
+  mutate(group = "baking ingredients") %>%
+  select(group, everything())
+
+dog = 
+  instacart %>%
+  group_by(product_name) %>%
+  filter(aisle == "dog food care") %>%
+  summarise(order_times = n()) %>%
+  arrange(desc(order_times)) %>%
+  head(n = 3) %>%
+  mutate(group = "dog food care") %>%
+  select(group, everything())
+
+vege =
+  instacart %>%
+  group_by(product_name) %>%
+  filter(aisle == "packaged vegetables fruits") %>%
+  summarise(order_times = n()) %>%
+  arrange(desc(order_times)) %>%
+  head(n = 3) %>%
+  mutate(group = "packaged vegetables fruits") %>%
+  select(group, everything())
+
+merge(baking, dog, all = TRUE) %>%
+  merge(vege, all = TRUE) %>%
+  knitr::kable()
+```
+
+
+# Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+```{r echo=FALSE}
+instacart %>%
+  select(product_name, order_hour_of_day, order_dow) %>%
+  filter(product_name == "Pink Lady Apples"|product_name == "Coffee Ice Cream") %>%
+  group_by(product_name, order_dow) %>%
+  summarise(
+    mean_hour = mean(order_hour_of_day)
+  ) %>%
+  mutate(
+    mean_hour = as.integer(mean_hour),
+    order_dow = recode(order_dow, "0" = "Sun", "1" = "Mon", "2" = "Tue", "3" = "Wed", "4" = "Thur", "5" = "Fri", "6" = "Sat")
+  ) %>%
+  pivot_wider(
+    names_from = "order_dow",
+    values_from = "mean_hour"
+  ) %>%  
+  knitr::kable()
+```
+
+
