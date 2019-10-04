@@ -17,8 +17,10 @@ knitr::opts_chunk$set(
 ```{r}
 library(p8105.datasets)
 library(tidyverse)
+library(patchwork)
 data("instacart")
 data("brfss_smart2010")
+accel = read_csv("./accel_data.csv") 
 ```
 
 ```{r include=FALSE}
@@ -161,6 +163,7 @@ In 2002, `r location2002$locationabbr` were observed at 7 or more locations.
 In 2010, `r location2010$locationabbr` were observed at 7 or more locations.
 
 ```{r echo=FALSE}
+## WHY NA.
 Averagedf =
   brfss_OH %>%
   filter(response == "Excellent") %>%
@@ -183,24 +186,88 @@ Averagedf =
   viridis::scale_color_viridis(
     name ="States",
     discrete = TRUE)
-
-###Year = Averagedf$year
-###State = Averagedf$locationabbr
-###Average = Averagedf$average
-###interaction.plot(Averagedf$year, State, Averagedf$average, xlab = "Year", ylab = "Average data value", main = "Spaghetti Plot", col = 2:10) 
 ```
 
 ```{r echo=FALSE}
-  brfss_OH %>%
-  filter(locationabbr == "NY" & year == "2006") %>%
+a =  brfss_OH %>%
+  filter(locationabbr == "NY" & year == "2006" ) %>%
   select(locationdesc, response, data_value) %>%
   group_by(locationdesc) %>%
   ggplot(aes(x = response, y = data_value, color = locationdesc)) +
-  geom_point() + geom_line() +
+  geom_point(size = 4, alpha = .5) + geom_line() +
   labs(
       title = "Response Plot for 2016",
       x = "Year",
       y = "Average data value"
+    ) +
+  viridis::scale_color_viridis(
+    name = "Location",
+    discrete = TRUE)
+
+b =  brfss_OH %>%
+  filter(locationabbr == "NY" & year == "2010" ) %>%
+  select(locationdesc, response, data_value) %>%
+  group_by(locationdesc) %>%
+  ggplot(aes(x = response, y = data_value, color = locationdesc)) +
+  geom_point(size = 4, alpha = .5) + geom_line() +
+  labs(
+      title = "Response Plot for 2016",
+      x = "Year",
+      y = "Average data value"
+    ) +
+  viridis::scale_color_viridis(
+    name = "Location",
+    discrete = TRUE)
+
+a/b
+
+## how to geom_line????
+```
+
+# Problem3
+```{r include=FALSE}
+accel = 
+  accel %>%
+  janitor::clean_names()
+
+weekend =
+  accel %>%
+  filter(day == "Sunday" | day == "Saturday") %>%
+  mutate( weekday_end = "weekend") %>%
+  select(week, day_id, day, weekday_end, everything())
+
+weekday = 
+  accel %>%
+  filter(day == "Monday" | day == "Tuesday" | day == "Wednesday" | day == "Thursday" | day == "Friday") %>%
+  mutate( weekday_end = "weekday") %>%
+  select(week, day_id, day, weekday_end, everything())
+
+accel =
+  merge(weekend, weekday, all = TRUE) %>%
+  arrange(week, day_id) %>%
+    mutate_if(is.double, as.integer)
+```
+For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information.
+
+```{r include=FALSE}
+accel$sum = rowSums(accel[, 5:144])
+accel = select(accel, week, day_id, day, weekday_end, sum, everything())
+table = select(accel, week, day_id, day, weekday_end, sum) 
+knitr::kable(table)
+# cannot knit
+#Are any trends apparent?
+```
+ 
+```{r}
+table %>%
+  #group_by(week) %>%
+  select(week, day, sum) %>%
+  ggplot(aes(x = week, y = sum, color = day)) +
+  geom_point(size = 4, alpha = .5) + geom_line() +
+  labs(
+      title = "24-hour activity time courses",
+      x = "Week",
+      y = "Sum of a day"
     ) +
   viridis::scale_color_viridis(
     name ="Location",
@@ -208,11 +275,5 @@ Averagedf =
   
 ```
 
-Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.
-
-
-# Problem3
-```{r include=FALSE}
-accel = read_csv("./accel_data.csv")
-```
+Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph
 
