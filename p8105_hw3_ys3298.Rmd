@@ -259,13 +259,12 @@ accel =
   merge(weekend, weekday, all = TRUE) %>%
   arrange(week, day_id) %>%
     mutate_if(is.double, as.integer)
-accel
 ```
 
 For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information.
 
 ```{r echo=FALSE}
-accel$sum = rowSums(accel[, 5:144])
+accel$sum = rowSums(accel[, 5:1440])
 accel = select(accel, week, day_id, day, weekday_end, sum, everything())
 table = select(accel, week, day_id, day, weekday_end, sum) 
 knitr::kable(table)
