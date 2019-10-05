@@ -55,18 +55,21 @@ aisle_max =
   instacart %>%
   group_by(aisle) %>%
   summarise(number = n()) %>%
-  filter(number >= 10000) %>%
+  filter(number > 10000) %>%
   ggplot(aes(x = reorder(aisle, number), y = number, fill = aisle)) +
   geom_col() + coord_flip() +
   viridis::scale_fill_viridis(option = "viridis" , discrete = TRUE) +
   labs(
-    title = "Aisle Plot",
+    title = "The number of items ordered in each Aisle",
     x = "aisles",
     y = "number"
-  )
+  ) +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
-## Make a table1 
+From the plot, we can clearly see the rank of number of items ordered in each aisle. The orders from fresh vegetables are the most and  butter is the least.
+
+## Table1: most populat items in each aisles
 ```{r echo=FALSE}
 baking = 
   instacart %>%
@@ -103,8 +106,9 @@ merge(baking, dog, all = TRUE) %>%
   knitr::kable()
 ```
 
+From the table, the most popular items from baking ingredients are cane sugar, light brown sugar and pure baking soda. In the group of dog food care, organix chicken&brown rice recipe, small dog biscuits, snack sticks chicken & rice recipe dog treats are the top3 popular items. And in the group of packaged vegetables fruits, organic baby spinach, organic blueberries, organic raspverries sells best.
 
-## Make a table2
+## Table2: mean hour of a day ordered on each day
 ```{r echo=FALSE}
 instacart %>%
   select(product_name, order_hour_of_day, order_dow) %>%
@@ -124,8 +128,10 @@ instacart %>%
   knitr::kable()
 ```
 
+From this table, we can clearly see the mean hour of the day at which pink lady apples and coffee ice cream are ordered on each day of the week. In order to see clearly, I round the value to integer.
+
 # Problem2
-format the data to use appropriate variable names;
+
 
 ```{r include=FALSE}
 ##cleaning
@@ -136,6 +142,7 @@ format the data to use appropriate variable names;
   mutate(
     response = factor(response, levels = c("Poor", "Fair", "Good", "Very good", "Excellent"), ordered = TRUE )
   )
+
 ```
 
 ```{r include=FALSE}
@@ -175,8 +182,8 @@ Averagedf =
   filter(response == "Excellent") %>%
   group_by(locationabbr, year) %>%
   summarise(average = mean(data_value)) %>%
-  select(year, locationabbr, average)%>%
-  ggplot(aes(x = year, y = average, color = locationabbr)) +
+  select(year, locationabbr, average) %>%
+  ggplot(aes(x = year, y = average, color = locationabbr, group = locationabbr)) +
   geom_line() + 
     labs(
       title = "Spaghetti Plot",
@@ -184,48 +191,54 @@ Averagedf =
       y = "Average data value"
     ) +
   viridis::scale_color_viridis(
-    name ="States",
-    discrete = TRUE)
+    name = "States",
+    discrete = TRUE) +
+    theme(plot.title = element_text(hjust = 0.5))
 ```
+
+This figure has so many states information, so it's not so clearly to see. We notice that most of the states fluctuate from 2002 to 2010.
 
 ```{r echo=FALSE}
 a =  brfss_OH %>%
   filter(locationabbr == "NY" & year == "2006" ) %>%
   select(locationdesc, response, data_value) %>%
   group_by(locationdesc) %>%
-  ggplot(aes(x = response, y = data_value, color = locationdesc)) +
+  ggplot(aes(x = locationdesc, y = data_value, color = response, group = response)) +
   geom_point(size = 4, alpha = .5) + geom_line() +
   labs(
-      title = "Response Plot for 2016",
+      title = "Response Plot for 2006",
       x = "Year",
       y = "Average data value"
     ) +
   viridis::scale_color_viridis(
-    name = "Location",
-    discrete = TRUE)
+    name = "Response",
+    discrete = TRUE) +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
 
 b =  brfss_OH %>%
   filter(locationabbr == "NY" & year == "2010" ) %>%
   select(locationdesc, response, data_value) %>%
-  group_by(locationdesc) %>%
-  ggplot(aes(x = response, y = data_value, color = locationdesc)) +
+  #group_by(locationdesc) %>%
+  ggplot(aes(x = locationdesc, y = data_value, color = response, group = response)) +
   geom_point(size = 4, alpha = .5) + geom_line() +
   labs(
-      title = "Response Plot for 2016",
+      title = "Response Plot for 2010",
       x = "Year",
       y = "Average data value"
     ) +
   viridis::scale_color_viridis(
-    name = "Location",
-    discrete = TRUE)
+    name = "Response",
+    discrete = TRUE) +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
 
-a/b
+a + b
 
-## how to geom_line????
 ```
 
+From the table, we can see the distribution of data value for reponses among locations. "Poor" was the lowest and "Very good" and "Excellent" and relatively high. There is difference in different locations. Form 2006 to 2010, the distribution changed a little bit.
+
 # Problem3
-```{r include=FALSE}
+```{r echo=FALSE}
 accel = 
   accel %>%
   janitor::clean_names()
@@ -246,19 +259,23 @@ accel =
   merge(weekend, weekday, all = TRUE) %>%
   arrange(week, day_id) %>%
     mutate_if(is.double, as.integer)
+accel
 ```
+
 For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information.
 
-```{r include=FALSE}
+```{r echo=FALSE}
 accel$sum = rowSums(accel[, 5:144])
 accel = select(accel, week, day_id, day, weekday_end, sum, everything())
 table = select(accel, week, day_id, day, weekday_end, sum) 
 knitr::kable(table)
-# cannot knit
+
 #Are any trends apparent?
 ```
+
+This table in not clear to see the trend. However, there are a few number greater than 10000 and most of them come from Thursday. It's relatively low at the first few weeks and than increase and finally go down.
  
-```{r}
+```{r echo=FALSE}
 table %>%
   #group_by(week) %>%
   select(week, day, sum) %>%
@@ -271,9 +288,11 @@ table %>%
     ) +
   viridis::scale_color_viridis(
     name ="Location",
-    discrete = TRUE)
+    discrete = TRUE) +
+  theme(plot.title = element_text(hjust = 0.5))
   
 ```
 
-Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph
 
+Based on this graph, we can see the total number in Thursday is relatively high and fluctuate dramaticly. For Saturday, the value first wen up and than went down.
+Most of them declined comparing with the 1st week.
