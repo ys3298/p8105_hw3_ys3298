@@ -101,8 +101,7 @@ vege =
   mutate(group = "packaged vegetables fruits") %>%
   select(group, everything())
 
-merge(baking, dog, all = TRUE) %>%
-  merge(vege, all = TRUE) %>%
+bind_rows(baking, dog, vege) %>%
   knitr::kable()
 ```
 
@@ -314,12 +313,27 @@ This table in not clear to see the trend. However, there are a few number greate
 ```{r echo=FALSE}
 table %>%
   #group_by(week) %>%
-  select(week, day, sum) %>%
+  select(week, day, day_id, sum) %>%
   ggplot(aes(x = week, y = sum, color = day)) +
   geom_point(size = 4, alpha = .5) + geom_line() +
   labs(
-      title = "24-hour activity time courses",
+      title = "24-hour activity by week",
       x = "Week",
+      y = "Sum of a day"
+    ) +
+  viridis::scale_color_viridis(
+    name ="Location",
+    discrete = TRUE) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+table %>%
+  #group_by(week) %>%
+  select(week, day, day_id, sum) %>%
+  ggplot(aes(x = day_id, y = sum, color = day)) +
+  geom_point(size = 4, alpha = .5) + geom_line() +
+  labs(
+      title = "24-hour activity by day",
+      x = "Day_id",
       y = "Sum of a day"
     ) +
   viridis::scale_color_viridis(
