@@ -2,7 +2,7 @@
 title: "p8105_hw3_ys3298"
 author: "Yimeng SHANG"
 date: "10/3/2019"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
