@@ -117,7 +117,7 @@ instacart %>%
     mean_hour = mean(order_hour_of_day)
   ) %>%
   mutate(
-    mean_hour = as.integer(mean_hour),
+    mean_hour = round(mean_hour),
     order_dow = recode(order_dow, "0" = "Sun", "1" = "Mon", "2" = "Tue", "3" = "Wed", "4" = "Thur", "5" = "Fri", "6" = "Sat")
   ) %>%
   pivot_wider(
