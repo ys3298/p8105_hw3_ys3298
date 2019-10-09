@@ -340,6 +340,11 @@ table %>%
     name ="Location",
     discrete = TRUE) +
   theme(plot.title = element_text(hjust = 0.5))
+
+ plotdf <- accel %>% 
+   pivot_longer(cols=starts_with("activity_"), names_prefix = ("activity_"), ) %>% 
+   mutate(name=as.integer(name)) %>% mutate(index=name+1440*day_id-1440)
+ ggplot(plotdf) + geom_linerange(aes(x=index,ymax=value,ymin=0,colour=day))
   
 ```
 
