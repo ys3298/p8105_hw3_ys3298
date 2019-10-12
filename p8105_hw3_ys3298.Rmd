@@ -67,7 +67,7 @@ aisle_max =
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-From the plot, we can clearly see the rank of number of items ordered in each aisle. The orders from fresh vegetables are the most and  butter is the least within those whose order is more than 10000.
+Comment: From the plot, we can clearly see the rank of number of items ordered in each aisle. The orders from fresh vegetables are the most and  butter is the least within those whose order is more than 10000.
 
 ## Table1: most populat items in each aisles
 ```{r echo=FALSE}
@@ -105,7 +105,7 @@ bind_rows(baking, dog, vege) %>%
   knitr::kable()
 ```
 
-From the table, the most popular items from baking ingredients are cane sugar, light brown sugar and pure baking soda. In the group of dog food care, organix chicken&brown rice recipe, small dog biscuits, snack sticks chicken & rice recipe dog treats are the top3 popular items. And in the group of packaged vegetables fruits, organic baby spinach, organic blueberries, organic raspverries sells best.
+Comment: From the table, the most popular items from baking ingredients are cane sugar, light brown sugar and pure baking soda. In the group of dog food care, organix chicken&brown rice recipe, small dog biscuits, snack sticks chicken & rice recipe dog treats are the top3 popular items. And in the group of packaged vegetables fruits, organic baby spinach, organic blueberries, organic raspverries sells best.
 
 ## Table2: mean hour of a day ordered on each day
 ```{r echo=FALSE}
@@ -127,7 +127,7 @@ instacart %>%
   knitr::kable()
 ```
 
-From this table, we can clearly see the mean hour of the day at which pink lady apples and coffee ice cream are ordered on each day of the week. Coffee ice cream is ordered most on Tuesday and least on Friday.
+Comment: From this table, we can clearly see the mean hour of the day at which pink lady apples and coffee ice cream are ordered on each day of the week. Coffee ice cream is ordered most on Tuesday and least on Friday.
 
 # Problem2
 
@@ -164,7 +164,7 @@ location2010 =
   filter(total_location >= 7) %>%
   arrange(total_location)
 ```
-In 2002, `r location2002$locationabbr` were observed at 7 or more locations. Total: `r length(location2002$locationabbr)`
+Comment: In 2002, `r location2002$locationabbr` were observed at 7 or more locations. Total: `r length(location2002$locationabbr)`
 
 In 2010, `r location2010$locationabbr` were observed at 7 or more locations. Total: `r length(location2010$locationabbr)`
 
@@ -197,7 +197,7 @@ Averagedf =
     theme(plot.title = element_text(hjust = 0.5))
 ```
 
-This figure has so many states information, so it's not so clearly to see. We notice that most of the states fluctuate from 2002 to 2010.
+Comment: This figure has so many states information, so it's not so clearly to see. We notice that most of the states fluctuate from 2002 to 2010.
 
 ```{r echo=FALSE}
 a =  brfss_OH %>%
@@ -235,7 +235,7 @@ b =  brfss_OH %>%
 a + b
 ```
 
-From the Plot, we can see the distribution of data value for reponses among locations. "Poor" was the lowest and "Very good" and "Excellent" and relatively high. There is difference in different locations. Form 2006 to 2010, the distribution changed a little bit.
+Comment: From the Plot, we can see the distribution of data value for reponses among locations. "Poor" was the lowest and "Very good" and "Excellent" and relatively high. There is difference in different locations. Form 2006 to 2010, the distribution changed a little bit.
 
 or In this way:
 
@@ -300,7 +300,7 @@ accel =
 accel
 ```
 
-For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information. I round all data into integer in order to see clearly.
+Comment: For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information. I round all data into integer in order to see clearly.
 
 ## Table
 ```{r echo=FALSE}
@@ -312,7 +312,7 @@ knitr::kable(table)
 #Are any trends apparent? NO
 ```
 
-This table in not clear to see the trend. However, there are a few number greater than 10000 and most of them come from Thursday. It's relatively low at the first few weeks and than increase and finally go down.
+Comment: This table in not clear to see the trend. However, there are a few number greater than 10000 and most of them come from Thursday. It's relatively low at the first few weeks and than increase and finally go down.
  
 ```{r echo=FALSE}
 accel$day = ordered(accel$day, 
@@ -332,4 +332,4 @@ ggplot(plotdf) + geom_linerange(aes(x=index,ymax=value,ymin=0,colour=day)) + sca
 ```
 
 
-Based on this graph, we can see the activity for 1st week is relatively low and the activity for week 2 and 3 is relatively high. In the first week, the activity for Monday, Tuesday, Wednesday, Thursday is very low compared with others.
+Comment: Based on this graph, we can see the activity for 1st week is relatively low and the activity for week 2 and 3 is relatively high. In the first week, the activity for Monday, Tuesday, Wednesday, Thursday is very low compared with others.
