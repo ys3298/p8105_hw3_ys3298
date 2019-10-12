@@ -47,7 +47,7 @@ aisle_max =
 
 **illstrative examples of observations:** For the 1st order, there're 8 different kind of products. Eval set is train. In details, the first product is `r instacart[1,11]`, aisle id is `r instacart[1,12]`, department id is `r instacart[1,13]`, aisle is `r instacart[1,14]`, department is `r instacart[1,15]`. For the second observations, aisle id is `r instacart[2,12]`, department id is `r instacart[2,13]`, aisle is `r instacart[2,14]`, department is `r instacart[2,15]` .
 
-**How many aisles are there, and which aisles are the most items ordered from?** There are `r aisle_num` aisles. The most items ordered from `r aisle_max`.
+**How many aisles are there, and which aisles are the most items ordered from?** There are `r aisle_num` aisles. The most items ordered from `r aisle_max`. comment: the order from different aisles are very different, vegetable is the most and then fresh fruit.
 
 ## Make a plot
 ```{r echo=FALSE}
@@ -67,7 +67,7 @@ aisle_max =
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-From the plot, we can clearly see the rank of number of items ordered in each aisle. The orders from fresh vegetables are the most and  butter is the least.
+From the plot, we can clearly see the rank of number of items ordered in each aisle. The orders from fresh vegetables are the most and  butter is the least within those whose order is more than 10000.
 
 ## Table1: most populat items in each aisles
 ```{r echo=FALSE}
@@ -127,7 +127,7 @@ instacart %>%
   knitr::kable()
 ```
 
-From this table, we can clearly see the mean hour of the day at which pink lady apples and coffee ice cream are ordered on each day of the week. In order to see clearly, I round the value to integer.
+From this table, we can clearly see the mean hour of the day at which pink lady apples and coffee ice cream are ordered on each day of the week. Coffee ice cream is ordered most on Tuesday and least on Friday.
 
 # Problem2
 
@@ -164,9 +164,11 @@ location2010 =
   filter(total_location >= 7) %>%
   arrange(total_location)
 ```
-In 2002, `r location2002$locationabbr` were observed at 7 or more locations.
+In 2002, `r location2002$locationabbr` were observed at 7 or more locations. Total: `r length(location2002$locationabbr)`
 
-In 2010, `r location2010$locationabbr` were observed at 7 or more locations.
+In 2010, `r location2010$locationabbr` were observed at 7 or more locations. Total: `r length(location2010$locationabbr)`
+
+It's more in 2010 than 2002.
 
 ```{r echo=FALSE}
 ## WHY NA.
@@ -295,69 +297,39 @@ accel =
   merge(weekend, weekday, all = TRUE) %>%
   arrange(week, day_id) %>%
     mutate_if(is.double, as.integer)
+accel
 ```
 
-For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information.
+For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information. I round all data into integer in order to see clearly.
 
+## Table
 ```{r echo=FALSE}
 accel$sum = rowSums(accel[, 5:1440])
 accel = select(accel, week, day_id, day, weekday_end, sum, everything())
 table = select(accel, week, day_id, day, weekday_end, sum) 
 knitr::kable(table)
 
-#Are any trends apparent?
+#Are any trends apparent? NO
 ```
 
 This table in not clear to see the trend. However, there are a few number greater than 10000 and most of them come from Thursday. It's relatively low at the first few weeks and than increase and finally go down.
  
 ```{r echo=FALSE}
-table %>%
-  #group_by(week) %>%
-  select(week, day, day_id, sum) %>%
-  ggplot(aes(x = week, y = sum, color = day)) +
-  geom_point(size = 4, alpha = .5) + geom_line() +
-  labs(
-      title = "24-hour activity by week",
-      x = "Week",
-      y = "Sum of a day"
-    ) +
-  viridis::scale_color_viridis(
-    name = "Location",
-    discrete = TRUE) +
-  theme(plot.title = element_text(hjust = 0.5))
-
-table %>%
-  #group_by(week) %>%
-  select(week, day, day_id, sum) %>%
-  ggplot(aes(x = day_id, y = sum, color = day)) +
-  geom_point(size = 4, alpha = .5) + geom_line() +
-  labs(
-      title = "24-hour activity by day",
-      x = "Day_id",
-      y = "Sum of a day"
-    ) +
-  viridis::scale_color_viridis(
-    name = "Location",
-    discrete = TRUE) +
-  theme(plot.title = element_text(hjust = 0.5))
-
-
 accel$day = ordered(accel$day, 
-                    levels = c("Monday", "Tuesday",
+                    levels= c("Monday", "Tuesday",
                               "Wednesday", "Thursday","Friday", "Saturday","Sunday"))
 sorted_accel = accel %>% 
                 arrange(week, day) %>% 
-                mutate(day_id = 1:n())
+                mutate(day_id=1:n())
                 
 plotdf = sorted_accel %>% 
-          pivot_longer(cols = starts_with("activity_"), 
-                       names_prefix = ("activity_"), ) %>%
-                       mutate(name = as.integer(name)) %>%
-                       mutate(index = name + 1440 * day_id - 1440)
-ggplot(plotdf) + geom_linerange(aes(x=index,ymax = value,ymin = 0,colour = day))
+          pivot_longer(cols=starts_with("activity_"), 
+                       names_prefix = ("activity_")) %>%
+          mutate(index=1:n())
+          
+ggplot(plotdf) + geom_linerange(aes(x=index,ymax=value,ymin=0,colour=day)) + scale_x_continuous("weeks", breaks = seq(5040, 50400 - 5040, 1440*7),labels=c(1:5)) + labs(title = "activity in 24 hours")
   
 ```
 
 
-Based on this graph, we can see the total number in Thursday is relatively high and fluctuate dramaticly. For Saturday, the value first wen up and than went down.
-Most of them declined comparing with the 1st week.
+Based on this graph, we can see the activity for 1st week is relatively low and the activity for week 2 and 3 is relatively high. In the first week, the activity for Monday, Tuesday, Wednesday, Thursday is very low compared with others.
