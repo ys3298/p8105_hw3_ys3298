@@ -187,7 +187,7 @@ Averagedf =
   ggplot(aes(x = year, y = average, color = locationabbr, group = locationabbr)) +
   geom_line() + 
     labs(
-      title = "Spaghetti Plot",
+      title = "averages the data_value across locations limited to Excellent responses",
       x = "Year",
       y = "Average data value"
     ) +
@@ -302,7 +302,7 @@ accel
 
 Comment: For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information. I round all data into integer in order to see clearly.
 
-## Table
+## Total activity variable for each day
 ```{r echo=FALSE}
 accel$sum = rowSums(accel[, 5:1440])
 accel = select(accel, week, day_id, day, weekday_end, sum, everything())
