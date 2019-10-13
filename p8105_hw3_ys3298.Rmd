@@ -7,14 +7,15 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
+	echo = TRUE,
+	fig.height = 6,
+	fig.width = 8,
 	warning = FALSE,
-	fig.width = 8, 
-  fig.height = 6,
-  out.width = "90%"
+	out.width = "90%"
 )
 ```
 
-```{r}
+```{r echo=TRUE}
 library(p8105.datasets)
 library(tidyverse)
 library(patchwork)
@@ -23,14 +24,15 @@ data("brfss_smart2010")
 accel = read_csv("./accel_data.csv") 
 ```
 
-```{r include=FALSE}
+```{r echo=TRUE}
 aisle_num =
   instacart %>%
   group_by(aisle) %>%
   summarise(number = n()) %>%
   count() %>%
   as.integer()
-  
+aisle_num 
+
 aisle_max = 
   instacart %>%
   group_by(aisle) %>%
@@ -38,6 +40,7 @@ aisle_max =
   filter(number == max(number)) %>%
   select(-number) %>%
   as.character()
+aisle_max
 ```
 # Problem1
 ## Short description
@@ -50,7 +53,7 @@ aisle_max =
 **How many aisles are there, and which aisles are the most items ordered from?** There are `r aisle_num` aisles. The most items ordered from `r aisle_max`. comment: the order from different aisles are very different, vegetable is the most and then fresh fruit.
 
 ## Make a plot
-```{r echo=FALSE}
+```{r echo=TRUE}
 
   instacart %>%
   group_by(aisle) %>%
@@ -70,7 +73,7 @@ aisle_max =
 Comment: From the plot, we can clearly see the rank of number of items ordered in each aisle. The orders from fresh vegetables are the most and  butter is the least within those whose order is more than 10000.
 
 ## Table1: most populat items in each aisles
-```{r echo=FALSE}
+```{r echo=TRUE}
 baking = 
   instacart %>%
   group_by(product_name) %>%
@@ -108,7 +111,7 @@ bind_rows(baking, dog, vege) %>%
 Comment: From the table, the most popular items from baking ingredients are cane sugar, light brown sugar and pure baking soda. In the group of dog food care, organix chicken&brown rice recipe, small dog biscuits, snack sticks chicken & rice recipe dog treats are the top3 popular items. And in the group of packaged vegetables fruits, organic baby spinach, organic blueberries, organic raspverries sells best.
 
 ## Table2: mean hour of a day ordered on each day
-```{r echo=FALSE}
+```{r echo=TRUE}
 instacart %>%
   select(product_name, order_hour_of_day, order_dow) %>%
   filter(product_name == "Pink Lady Apples" | product_name == "Coffee Ice Cream") %>%
@@ -132,7 +135,7 @@ Comment: From this table, we can clearly see the mean hour of the day at which p
 # Problem2
 
 
-```{r include=FALSE}
+```{r echo=TRUE}
 ##cleaning
   brfss_OH =
   brfss_smart2010 %>%
@@ -141,10 +144,10 @@ Comment: From this table, we can clearly see the mean hour of the day at which p
   mutate(
     response = factor(response, levels = c("Poor", "Fair", "Good", "Very good", "Excellent"), ordered = TRUE )
   )
-
+brfss_OH
 ```
 
-```{r include=FALSE}
+```{r echo=TRUE}
 location2002 =
   brfss_OH %>%
   filter(year ==  "2002") %>%
@@ -154,6 +157,7 @@ location2002 =
   filter(total_location >= 7) %>%
   arrange(total_location)
 location2002$locationabbr
+location2002
 
 location2010 =
   brfss_OH %>%
@@ -163,6 +167,7 @@ location2010 =
   summarise(total_location = n()) %>%
   filter(total_location >= 7) %>%
   arrange(total_location)
+location2010 
 ```
 Comment: In 2002, `r location2002$locationabbr` were observed at 7 or more locations. Total: `r length(location2002$locationabbr)`
 
@@ -170,7 +175,7 @@ In 2010, `r location2010$locationabbr` were observed at 7 or more locations. Tot
 
 It's more in 2010 than 2002.
 
-```{r echo=FALSE}
+```{r echo=TRUE}
 ## WHY NA.
 Averagedf =
   brfss_OH %>%
@@ -178,6 +183,7 @@ Averagedf =
   group_by(locationabbr, year) %>%
   summarise(average = mean(data_value)) %>%
   select(year, locationabbr, average)
+Averagedf
 
   brfss_OH %>%
   filter(response == "Excellent") %>%
@@ -199,7 +205,7 @@ Averagedf =
 
 Comment: This figure has so many states information, so it's not so clearly to see. We notice that most of the states fluctuate from 2002 to 2010.
 
-```{r echo=FALSE}
+```{r echo=TRUE}
 a =  brfss_OH %>%
   filter(locationabbr == "NY" & year == "2006" ) %>%
   select(locationdesc, response, data_value) %>%
@@ -216,6 +222,7 @@ a =  brfss_OH %>%
     discrete = TRUE) +
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
 
+
 b =  brfss_OH %>%
   filter(locationabbr == "NY" & year == "2010" ) %>%
   select(locationdesc, response, data_value) %>%
@@ -231,6 +238,7 @@ b =  brfss_OH %>%
     name = "Location",
     discrete = TRUE) +
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ 
 
 a + b
 ```
@@ -239,7 +247,7 @@ Comment: From the Plot, we can see the distribution of data value for reponses a
 
 or In this way:
 
-```{r echo=FALSE, warning=TRUE}
+```{r echo=TRUE, warning=TRUE}
 c =  brfss_OH %>%
   filter(locationabbr == "NY" & year == "2006" ) %>%
   select(locationdesc, response, data_value) %>%
@@ -276,10 +284,15 @@ c+d
 ```
 
 # Problem3
-```{r echo=FALSE}
+```{r echo=TRUE}
 accel = 
   accel %>%
-  janitor::clean_names()
+  janitor::clean_names() %>% 
+  pivot_longer(
+    names_to = "activity",
+    values_to = "data_value"
+  )
+###变成竖的
 
 weekend =
   accel %>%
@@ -296,25 +309,27 @@ weekday =
 accel =
   merge(weekend, weekday, all = TRUE) %>%
   arrange(week, day_id) %>%
+  mutate(starts_with("activity_"), round(starts_with("activity_"))) %>% 
     mutate_if(is.double, as.integer)
-accel
+
 ```
 
 Comment: For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information. I round all data into integer in order to see clearly.
 
 ## Total activity variable for each day
-```{r echo=FALSE}
+```{r echo=TRUE}
 accel$day = ordered(accel$day, 
-                    levels= c("Monday", "Tuesday",
+                    levels = c("Monday", "Tuesday",
                               "Wednesday", "Thursday","Friday", "Saturday","Sunday"))
 sorted_accel = accel %>% 
                 arrange(week, day) %>% 
-                mutate(day_id = 1:n())
+                mutate(day_id_new = 1:n())
 
 sorted_accel$sum = rowSums(sorted_accel[, 5:1440])
-accel = select(sorted_accel, week, day_id, day, weekday_end, sum, everything())
-table = select(sorted_accel, week, day_id, day, weekday_end, sum) 
+#accel = select(sorted_accel, week, day_id_new, day, weekday_end, sum, everything())
+table = select(sorted_accel, week, day_id_new, day, weekday_end, sum) 
 knitr::kable(table)
+
 
 sorted_accel %>% 
   group_by(week) %>%
@@ -330,12 +345,11 @@ sorted_accel %>%
     discrete = FALSE) +
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
 
-#Are any trends apparent? NO
 ```
 
-Comment: I rearrange the day_ id in oreder to put it into right order. This table in not clear to see the trend. From the plot, we can see in week1 and week2, the sum for each day increase from Monday to Sunday, however, in week3, week4 and week5, the trends are not so aparent.
+Comment: I **rearrange the day_ id (still named day_id)** in oreder to put it into right order. This table in not clear to see the trend. From the plot, we can see in week1 and week2, the sum for each day increase from Monday to Sunday, however, in week3, week4 and week5, the trends are not so aparent.
  
-```{r echo=FALSE}
+```{r echo=TRUE}
 accel$day = ordered(accel$day, 
                     levels= c("Monday", "Tuesday",
                               "Wednesday", "Thursday","Friday", "Saturday","Sunday"))
@@ -352,6 +366,8 @@ ggplot(plotdf) + geom_linerange(aes(x=index,ymax=value,ymin=0,colour=day)) + sca
     name = "week",
     discrete = TRUE) +
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+
+##加一个24hour图
   
 ```
 
