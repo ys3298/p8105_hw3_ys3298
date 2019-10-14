@@ -237,7 +237,7 @@ plot2006 + plot2010
 ```
 
 
-```{r echo=FALSE, warning=TRUE}
+```{r echo=TRUE, warning=TRUE}
 brfss_OH  %>% 
   filter(year == "2006" | year == "2010" ) %>% 
   filter(locationabbr == "NY") %>% 
@@ -257,6 +257,9 @@ brfss_OH  %>%
   filter(locationabbr == "NY") %>% 
   ggplot(aes(x = response, y = data_value)) +
   geom_boxplot() +
+    labs(
+    title = " Data value distribution of NY"
+  ) +
   facet_grid(~year)
 
 ```
@@ -282,6 +285,8 @@ accel =
   mutate(day_type = if_else(day<="Friday","WeekDay","WeekEnd")) %>% 
   mutate(value = round(value, 0)) %>% 
     mutate_if(is.double, as.integer)
+
+accel
 
 ```
 
@@ -327,10 +332,10 @@ ggplot(accel) +
 geom_area(aes(x=activity, y=value,colour=day,fill=day)) +
 scale_x_continuous("hour", breaks = seq(30, 1410, 60),labels=c(1:24)) + labs(title = "activity in 24 hours")
 ```
-Comment: Based on this graph, we can clearly see that the highest is around 22pm and then 12pm(two peaks), it means that the sum of all activities in this time for all day is the most. The lowest is from 24pm to 5am , it means that the sum of all activities in this time for all day is the least. And the activity on Monday is the most.
+Comment: Based on this graph, we can clearly see that the highest is around 22pm and then 12pm(two peaks), it means that the sum of all activities in this time for all day is the most. The lowest is from 24pm to 5am , it means that the sum of all activities in this time for all day is the least. And the activity on Monday is the most. However, because the color is too similar to tell what day it is, I then make another plot to show every day's activity in details:
 
-```{r eval=FALSE, include=FALSE}
-## another optional choice (not so good, didn't run and show)
+```{r echo=TRUE}
+
 ggplot(accel) + geom_linerange(aes(x=time,ymax=value,ymin=0,colour=day)) + scale_x_continuous("weeks", breaks = seq(5040, 50400 - 5040, 1440*7),labels=c(1:5)) + labs(title = "activity for every day") +   viridis::scale_color_viridis(
     name = "week",
     discrete = TRUE) +
