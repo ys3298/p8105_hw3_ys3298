@@ -328,13 +328,13 @@ accel_sum %>%
 Comment: I rearrange the day_id in oreder to put it into right order. This table in not clear to see the trend. From the plot, we can see in week1 and week2, the sum for each day increase from Monday to Sunday, however, in week3, week4 and week5, the trends are not so aparent.
  
 ```{r echo=TRUE}
-ggplot(accel) + geom_linerange(aes(x=time,ymax=value,ymin=0,colour=day)) + scale_x_continuous("weeks", breaks = seq(5040, 50400 - 5040, 1440*7),labels=c(1:5)) + labs(title = "activity for every day") +   viridis::scale_color_viridis(
-    name = "week",
-    discrete = TRUE) +
-  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+#ggplot(accel) + geom_linerange(aes(x=time,ymax=value,ymin=0,colour=day)) + scale_x_continuous("weeks", breaks = seq(5040, 50400 - 5040, 1440*7),labels=c(1:5)) + labs(title = "activity for every day") +   viridis::scale_color_viridis(
+#    name = "week",
+#    discrete = TRUE) +
+#  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
 
 ggplot(accel) +
-geom_area(aes(x=activity, y=value,colour=day,fill=day)) +
+geom_line(aes(x=activity, y=value,colour=day,fill=day)) +
 scale_x_continuous("hour", breaks = seq(30, 1410, 60),labels=c(1:24)) + labs(title = "activity in 24 hours")
   
 ```
