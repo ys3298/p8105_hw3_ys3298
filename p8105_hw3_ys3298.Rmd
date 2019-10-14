@@ -21,7 +21,7 @@ library(tidyverse)
 library(patchwork)
 data("instacart")
 data("brfss_smart2010")
-accel = read_csv("./accel_data.csv") 
+accel = read_csv("data/accel_data.csv") 
 ```
 
 ```{r echo=TRUE}
@@ -54,7 +54,6 @@ aisle_max
 
 ## Make a plot
 ```{r echo=TRUE}
-
   instacart %>%
   group_by(aisle) %>%
   summarise(number = n()) %>%
@@ -133,8 +132,6 @@ instacart %>%
 Comment: From this table, we can clearly see the mean hour of the day at which pink lady apples and coffee ice cream are ordered on each day of the week. Coffee ice cream is ordered most on Tuesday and least on Friday.
 
 # Problem2
-
-
 ```{r echo=TRUE}
 ##cleaning
   brfss_OH =
@@ -183,7 +180,7 @@ Averagedf =
   group_by(locationabbr, year) %>%
   summarise(average = mean(data_value)) %>%
   select(year, locationabbr, average)
-Averagedf
+
 
   brfss_OH %>%
   filter(response == "Excellent") %>%
@@ -239,13 +236,12 @@ b =  brfss_OH %>%
     discrete = TRUE) +
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
  
-
 a + b
 ```
 
 Comment: From the Plot, we can see the distribution of data value for reponses among locations. "Poor" was the lowest and "Very good" and "Excellent" and relatively high. There is difference in different locations. Form 2006 to 2010, the distribution changed a little bit.
 
-or In this way:
+or make the plot in this way:
 
 ```{r echo=TRUE, warning=TRUE}
 c =  brfss_OH %>%
@@ -288,28 +284,19 @@ c+d
 accel = 
   accel %>%
   janitor::clean_names() %>% 
-  pivot_longer(
-    names_to = "activity",
-    values_to = "data_value"
-  )
-###变成竖的
-
-weekend =
-  accel %>%
-  filter(day == "Sunday" | day == "Saturday") %>%
-  mutate( weekday_end = "weekend") %>%
-  select(week, day_id, day, weekday_end, everything())
-
-weekday = 
-  accel %>%
-  filter(day == "Monday" | day == "Tuesday" | day == "Wednesday" | day == "Thursday" | day == "Friday") %>%
-  mutate( weekday_end = "weekday") %>%
-  select(week, day_id, day, weekday_end, everything())
-
-accel =
-  merge(weekend, weekday, all = TRUE) %>%
-  arrange(week, day_id) %>%
-  mutate(starts_with("activity_"), round(starts_with("activity_"))) %>% 
+  mutate(day = ordered(day, levels=c("Monday", "Tuesday",
+                      "Wednesday","Thursday","Friday","Saturday","Sunday"))) %>%
+  arrange(week, day) %>%
+  mutate(sorted_DayId=1:n()) %>%
+  select(-day_id) %>%
+  pivot_longer(cols=starts_with("activity_"), 
+               names_prefix = "activity_",
+               names_to="activity") %>%
+  mutate(activity=as.integer(activity)) %>%
+  arrange(week, day, activity) %>% 
+  mutate(time=1:n()) %>%
+  mutate(day_type = if_else(day<="Friday","WeekDay","WeekEnd")) %>% 
+  mutate(value = round(value, 0)) %>% 
     mutate_if(is.double, as.integer)
 
 ```
@@ -318,22 +305,13 @@ Comment: For this resulting dataset, there are `r nrow(accel)` observations and 
 
 ## Total activity variable for each day
 ```{r echo=TRUE}
-accel$day = ordered(accel$day, 
-                    levels = c("Monday", "Tuesday",
-                              "Wednesday", "Thursday","Friday", "Saturday","Sunday"))
-sorted_accel = accel %>% 
-                arrange(week, day) %>% 
-                mutate(day_id_new = 1:n())
+accel_sum = accel %>% 
+  group_by(week,day,sorted_DayId,day_type) %>% 
+  summarise(value=sum(value)) 
+knitr::kable(accel_sum)
 
-sorted_accel$sum = rowSums(sorted_accel[, 5:1440])
-#accel = select(sorted_accel, week, day_id_new, day, weekday_end, sum, everything())
-table = select(sorted_accel, week, day_id_new, day, weekday_end, sum) 
-knitr::kable(table)
-
-
-sorted_accel %>% 
-  group_by(week) %>%
-  ggplot(aes(x = day, y = sum, color = week, group = week)) +
+accel_sum %>% 
+  ggplot(aes(x = day, y = value, color = week, group=week)) +
   geom_point(size = 4, alpha = .5) + geom_line() +
   labs(
      title = "sum for each day",
@@ -347,29 +325,19 @@ sorted_accel %>%
 
 ```
 
-Comment: I **rearrange the day_ id (still named day_id)** in oreder to put it into right order. This table in not clear to see the trend. From the plot, we can see in week1 and week2, the sum for each day increase from Monday to Sunday, however, in week3, week4 and week5, the trends are not so aparent.
+Comment: I rearrange the day_id in oreder to put it into right order. This table in not clear to see the trend. From the plot, we can see in week1 and week2, the sum for each day increase from Monday to Sunday, however, in week3, week4 and week5, the trends are not so aparent.
  
 ```{r echo=TRUE}
-accel$day = ordered(accel$day, 
-                    levels= c("Monday", "Tuesday",
-                              "Wednesday", "Thursday","Friday", "Saturday","Sunday"))
-sorted_accel = accel %>% 
-                arrange(week, day) %>% 
-                mutate(day_id=1:n())
-                
-plotdf = sorted_accel %>% 
-          pivot_longer(cols=starts_with("activity_"), 
-                       names_prefix = ("activity_")) %>%
-          mutate(index=1:n())
-          
-ggplot(plotdf) + geom_linerange(aes(x=index,ymax=value,ymin=0,colour=day)) + scale_x_continuous("weeks", breaks = seq(5040, 50400 - 5040, 1440*7),labels=c(1:5)) + labs(title = "activity in 24 hours") +   viridis::scale_color_viridis(
+ggplot(accel) + geom_linerange(aes(x=time,ymax=value,ymin=0,colour=day)) + scale_x_continuous("weeks", breaks = seq(5040, 50400 - 5040, 1440*7),labels=c(1:5)) + labs(title = "activity for every day") +   viridis::scale_color_viridis(
     name = "week",
     discrete = TRUE) +
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
 
-##加一个24hour图
+ggplot(accel) +
+geom_area(aes(x=activity, y=value,colour=day,fill=day)) +
+scale_x_continuous("hour", breaks = seq(30, 1410, 60),labels=c(1:24)) + labs(title = "activity in 24 hours")
   
 ```
 
 
-Comment: Based on this graph, we can see the activity for 1st week is relatively low and the activity for week 2 and 3 is relatively high. In the first week, the activity for Monday, Tuesday, Wednesday, Thursday is very low compared with others.
+Comment: Based on this graph, we can see the activity is relatively low at the beginning of a day, and increase. The most active periods are around 12pm and 22pm. After 22pm, the value starts to decrease.
