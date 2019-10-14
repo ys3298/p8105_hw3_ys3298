@@ -21,7 +21,7 @@ library(tidyverse)
 library(patchwork)
 data("instacart")
 data("brfss_smart2010")
-accel = read_csv("data/accel_data.csv") 
+accel = read_csv("./data/accel_data.csv") 
 ```
 
 ```{r echo=TRUE}
@@ -172,7 +172,6 @@ In 2010, `r location2010$locationabbr` were observed at 7 or more locations. Tot
 It's more in 2010 than 2002.
 
 ```{r echo=TRUE}
-## WHY NA.
 Averagedf =
   brfss_OH %>%
   filter(response == "Excellent") %>%
@@ -199,13 +198,13 @@ Averagedf =
     theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Comment: This figure has so many states information, so it's not so clearly to see. We notice that most of the states fluctuate from 2002 to 2010. Also, I do notice that there're a few NAs after take the average.
+Comment: This figure has so many states information, so it's not so clearly to see. We notice that most of the states fluctuate from 2002 to 2010. Also, I do notice that there're a few NAs after take the average(I don't think it's necessary to drop them).
 
-```{r echo=TRUE}
-a =  brfss_OH %>%
+```{r eval=FALSE, include=FALSE}
+#(don't choose this plot at last so did't run this part)
+plot2006 =  brfss_OH %>%
   filter(locationabbr == "NY" & year == "2006" ) %>%
   select(locationdesc, response, data_value) %>%
-  group_by(locationdesc) %>%
   ggplot(aes(x = locationdesc, y = data_value, color = response, group = response)) +
   geom_point(size = 4, alpha = .5) + geom_line() +
   labs(
@@ -219,10 +218,9 @@ a =  brfss_OH %>%
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
 
 
-b =  brfss_OH %>%
+plot2010 =  brfss_OH %>%
   filter(locationabbr == "NY" & year == "2010" ) %>%
   select(locationdesc, response, data_value) %>%
-  group_by(locationdesc) %>%
   ggplot(aes(x = locationdesc, y = data_value, color = response, group = response)) +
   geom_point(size = 4, alpha = .5) + geom_line() +
   labs(
@@ -235,49 +233,35 @@ b =  brfss_OH %>%
     discrete = TRUE) +
   theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
  
-a + b
+plot2006 + plot2010 
 ```
 
-Comment: From the Plot, we can see the distribution of data value for reponses among locations. "Poor" was the lowest and "Very good" and "Excellent" and relatively high. There is difference in different locations. Form 2006 to 2010, the distribution changed a little bit.
 
-
-
-```{r eval=FALSE, warning=TRUE, include=FALSE}
-# or in this way(I keep this chunk, but don't run it.):
-c =  brfss_OH %>%
-  filter(locationabbr == "NY" & year == "2006" ) %>%
-  select(locationdesc, response, data_value) %>%
-  group_by(response) %>%
-  ggplot(aes(x = response, y = data_value, color = response, group = locationdesc)) +
-  geom_point(size = 4, alpha = .5) + geom_line() +
+```{r echo=FALSE, warning=TRUE}
+brfss_OH  %>% 
+  filter(year == "2006" | year == "2010" ) %>% 
+  filter(locationabbr == "NY") %>% 
+  ggplot(aes(x = response, y = data_value,fill = locationdesc)) +
+  geom_line(aes(group = locationdesc, color = locationdesc)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_point(size = 2, alpha = 0.5) +
   labs(
-      title = "Response Plot for 2006",
-      x = "Response",
-      y = "data value"
-    ) +
-  viridis::scale_color_viridis(
-    name = "Response",
-    discrete = TRUE) +
-  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
-
-d =  brfss_OH %>%
-  filter(locationabbr == "NY" & year == "2010" ) %>%
-  select(locationdesc, response, data_value) %>%
-  group_by(response) %>%
-  ggplot(aes(x = response, y = data_value, color = response, group = locationdesc)) +
-  geom_point(size = 4, alpha = .5) + geom_line() +
-  labs(
-      title = "Response Plot for 2010",
-      x = "Response",
-      y = "data value"
-    ) +
-  viridis::scale_color_viridis(
-    name = "Response",
-    discrete = TRUE) +
-  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
-
-c+d
+    title = " Data value of NY"
+  ) +
+  facet_grid(~year)
 ```
+Comment: From the Plot, we can see the distribution of data value for reponses among locations. "Poor" was the lowest and "Very good" and "Excellent" and relatively high. There is difference in different locations. Form 2006 to 2010, the distribution changed a little bit, but the whole distribution is similar. Or we can also use boxplot as following:
+```{r echo=TRUE}
+brfss_OH  %>% 
+  filter(year == "2006" | year == "2010" ) %>% 
+  filter(locationabbr == "NY") %>% 
+  ggplot(aes(x = response, y = data_value)) +
+  geom_boxplot() +
+  facet_grid(~year)
+
+```
+
+
 
 # Problem3
 ```{r echo=TRUE}
