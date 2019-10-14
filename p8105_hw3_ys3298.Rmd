@@ -71,7 +71,7 @@ aisle_max
 
 Comment: From the plot, we can clearly see the rank of number of items ordered in each aisle. The orders from fresh vegetables are the most and  butter is the least within those whose order is more than 10000.
 
-## Table1: most populat items in each aisles
+## Table1: most popular items in each aisles
 ```{r echo=TRUE}
 baking = 
   instacart %>%
@@ -104,7 +104,7 @@ vege =
   select(group, everything())
 
 bind_rows(baking, dog, vege) %>%
-  knitr::kable()
+  knitr::kable(caption="top3 popular items in specific aisles")
 ```
 
 Comment: From the table, the most popular items from baking ingredients are cane sugar, light brown sugar and pure baking soda. In the group of dog food care, organix chicken&brown rice recipe, small dog biscuits, snack sticks chicken & rice recipe dog treats are the top3 popular items. And in the group of packaged vegetables fruits, organic baby spinach, organic blueberries, organic raspverries sells best.
@@ -126,7 +126,7 @@ instacart %>%
     names_from = "order_dow",
     values_from = "mean_hour"
   ) %>%  
-  knitr::kable()
+  knitr::kable(caption="Mean hour of a day ordered on each day")
 ```
 
 Comment: From this table, we can clearly see the mean hour of the day at which pink lady apples and coffee ice cream are ordered on each day of the week. Coffee ice cream is ordered most on Tuesday and least on Friday.
@@ -153,7 +153,6 @@ location2002 =
   summarise(total_location = n()) %>%
   filter(total_location >= 7) %>%
   arrange(total_location)
-location2002$locationabbr
 location2002
 
 location2010 =
@@ -200,7 +199,7 @@ Averagedf =
     theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Comment: This figure has so many states information, so it's not so clearly to see. We notice that most of the states fluctuate from 2002 to 2010.
+Comment: This figure has so many states information, so it's not so clearly to see. We notice that most of the states fluctuate from 2002 to 2010. Also, I do notice that there're a few NAs after take the average.
 
 ```{r echo=TRUE}
 a =  brfss_OH %>%
@@ -241,9 +240,10 @@ a + b
 
 Comment: From the Plot, we can see the distribution of data value for reponses among locations. "Poor" was the lowest and "Very good" and "Excellent" and relatively high. There is difference in different locations. Form 2006 to 2010, the distribution changed a little bit.
 
-or make the plot in this way:
 
-```{r echo=TRUE, warning=TRUE}
+
+```{r eval=FALSE, warning=TRUE, include=FALSE}
+# or in this way(I keep this chunk, but don't run it.):
 c =  brfss_OH %>%
   filter(locationabbr == "NY" & year == "2006" ) %>%
   select(locationdesc, response, data_value) %>%
@@ -301,7 +301,7 @@ accel =
 
 ```
 
-Comment: For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information. I round all data into integer in order to see clearly.
+Comment: I rearrange the day_id in oreder to put it into right order. For this resulting dataset, there are `r nrow(accel)` observations and `r ncol(accel)` variables. It also includes the week, day ID, weekend or weekday information. I round all activity value data into integer in order to see clearly.
 
 ## Total activity variable for each day
 ```{r echo=TRUE}
@@ -325,13 +325,9 @@ accel_sum %>%
 
 ```
 
-Comment: I rearrange the day_id in oreder to put it into right order. This table in not clear to see the trend. From the plot, we can see in week1 and week2, the sum for each day increase from Monday to Sunday, however, in week3, week4 and week5, the trends are not so aparent.
+Comment:  This table in not clear to see the trend. From the plot, we can see in week1 and week2, the sum for each day increase from Monday to Sunday, however, in week3, week4 and week5, the trends are not so aparent.
  
 ```{r echo=TRUE}
-#ggplot(accel) + geom_linerange(aes(x=time,ymax=value,ymin=0,colour=day)) + scale_x_continuous("weeks", breaks = seq(5040, 50400 - 5040, 1440*7),labels=c(1:5)) + labs(title = "activity for every day") +   viridis::scale_color_viridis(
-#    name = "week",
-#    discrete = TRUE) +
-#  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
 
 ggplot(accel) +
 geom_line(aes(x=activity, y=value,colour=day,fill=day)) +
@@ -340,4 +336,19 @@ scale_x_continuous("hour", breaks = seq(30, 1410, 60),labels=c(1:24)) + labs(tit
 ```
 
 
-Comment: Based on this graph, we can see the activity is relatively low at the beginning of a day, and increase. The most active periods are around 12pm and 22pm. After 22pm, the value starts to decrease.
+Comment: Based on this graph, we can see the activity is relatively low at the beginning of a day, and increase. The most active periods are around 12pm and 22pm. After 22pm, the value starts to decrease. There are so many overlaps between lines and lines, so I then use geom_area to show the sum of each minite in 24 hour as following.
+
+```{r}
+ggplot(accel) +
+geom_area(aes(x=activity, y=value,colour=day,fill=day)) +
+scale_x_continuous("hour", breaks = seq(30, 1410, 60),labels=c(1:24)) + labs(title = "activity in 24 hours")
+```
+Comment: Based on this graph, we can clearly see that the highest is around 22pm and then 12pm(two peaks), it means that the sum of all activities in this time for all day is the most. The lowest is from 24pm to 5am , it means that the sum of all activities in this time for all day is the least. And the activity on Monday is the most.
+
+```{r eval=FALSE, include=FALSE}
+## another optional choice (not so good, didn't run and show)
+ggplot(accel) + geom_linerange(aes(x=time,ymax=value,ymin=0,colour=day)) + scale_x_continuous("weeks", breaks = seq(5040, 50400 - 5040, 1440*7),labels=c(1:5)) + labs(title = "activity for every day") +   viridis::scale_color_viridis(
+    name = "week",
+    discrete = TRUE) +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom")
+```
